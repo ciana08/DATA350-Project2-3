@@ -115,8 +115,26 @@ server <- function(input, output) {
       mutate(percentage = round(count / sum(count)*100, digits = 1))|>
       ungroup()
   })
+  
   gender <- eventReactive(input$vizHD, {
     sum(as.numeric(input$genderHD))
+  })
+  
+  size <- eventReactive(input$vizHD, {
+    max <- max(length(input$raceHD), length(input$ageHD))
+    if(max <=1 ){
+      size = 8
+    }else if(max <= 2){
+      size = 5.5
+    }else if (max <= 3){
+      size = 4
+    }else if (max <= 4){
+      size = 2.75
+    }else if( max <= 6){
+      size = 1.8
+    }
+    
+    size
   })
   
   output$plotHD <- renderPlot({
@@ -134,7 +152,7 @@ server <- function(input, output) {
                color = "white") +
       geom_text(aes(label = paste0(percentage,'%')),
                 position = position_fill(vjust = 0.60),
-                size = 1.75)+
+                size = size())+
       coord_polar("y")+
       facet_grid(ageGroup ~ Race3)+
       scale_fill_brewer(palette = "Set1", name  = "Hard Drug Use", labels = c('No','Yes'))+
@@ -149,7 +167,7 @@ server <- function(input, output) {
       geom_text(
         aes(label = paste0(percentage,'%')),
         position = position_fill(vjust = 0.60),
-        size = 1.75)+
+        size = size())+
       coord_polar("y")+
       facet_grid(ageGroup ~ Race3)+
       scale_fill_brewer(palette = "Set1", name = 'Hard Drug Use', labels = c('No','Yes'))+
