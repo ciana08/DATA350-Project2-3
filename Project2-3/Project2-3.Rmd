@@ -305,4 +305,26 @@ p_cig2 <- ggplot(df_cigg, aes(x = Poverty, y = SmokeAge, col = MaritalStatus2))+
 (p_cig1/p_cig2)+
   guides(fill = FALSE)
 ```
+## How does alcohol consumption vary by marriage status, race, and gender?
+```{r}
+df_alc <- NHANESraw |>
+      select(Race3, AlcoholYear, Gender, MaritalStatus, Age, SurveyYr)|>
+      filter(SurveyYr == "2011_12" & Age >= 20)|>
+      filter(
+        !is.na(MaritalStatus), 
+        !is.na(Race3),
+        !is.na(Gender),
+        !is.na(AlcoholYear)) |> 
+      mutate(LogAlc = log(AlcoholYear))
+  
+  plot_alc_m <- ggplot(subset(df_alc, Gender == "male"), aes(x = LogAlc, fill = MaritalStatus)) +
+      geom_density(alpha = 0.3) +
+      facet_wrap(Race3)
+  plot_alc_f <- ggplot(subset(df_alc, Gender == "female"), aes(x = LogAlc, fill = MaritalStatus)) +
+      geom_density(alpha = 0.3) +
+      facet_wrap(Race3)
+  plot_alc <- ggplot(df_alc, aes(x = LogAlc, fill = MaritalStatus)) +
+      geom_density(alpha = 0.3) +
+      facet_wrap(Race3)
+```
 
