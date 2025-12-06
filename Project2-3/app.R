@@ -58,6 +58,37 @@ ui <- fluidPage(
              mainPanel(
                plotOutput('plotCig', height = '700px')
              )
+    ),
+    tabPanel('Alcohol and Marijuana',
+             h3('How does marijauna use relate to alcohol use, cholesterol and BMI across demographics such as race and gender?'),
+             sidebarPanel(
+               width = 3,
+               actionButton('vizMarj', 'Visualize'),
+               selectInput(
+                 inputId = "y_var",
+                 label = "Select Y-axis Variable:",
+                 choices = c("BMI" = "BMI", 
+                             "Cholesterol" = "TotChol"),
+                 selected = "BMI"
+               ),
+               checkboxGroupInput('raceMarj','Select Race', 
+                                  choices = c(
+                                    "White"    = "White",
+                                    "Mexican"  = "Mexican",
+                                    "Asian"    = "Asian",
+                                    "Black"    = "Black",
+                                    "Other"    = "Other",
+                                    "Hispanic" = "Hispanic"
+                                  ),
+                                  selected = c("White", "Mexican", "Asian", "Black", "Other", "Hispanic")
+               ),
+               checkboxGroupInput('genderMarj','Select Gender',
+                                  choices = unique(NHANESraw$Gender),
+                                  selected = unique(NHANESraw$Gender))
+             ),
+             mainPanel(
+               plotOutput('plotMarj', height = '700px')
+             )
     )
   )
 )
@@ -236,13 +267,50 @@ server <- function(input, output) {
       scale_color_brewer(palette = "Set1")+
       labs(caption = '95% Confidence Interval for Smoothing Model(s)')
     
-    
     (p_cig1/p_cig2)
-    
-    
   })
   
+  ###################### Alcohol + Marijuana ######################
+  df_marj <- eventReactive(input$vizMarj, {
+    df_mar <- NHANESraw |>
+      select(RegularMarij, Alcohol12PlusYr, BMI, TotChol, Gender, Race3) |>
+      filter(
+        !is.na(RegularMarij),
+        !is.na(Alcohol12PlusYr),
+        !is.na(BMI),
+        !is.na(TotChol),
+        !is.na(Gender),
+        !is.na(Race3)
+      ) |>
+      filter(
+        Gender %in% input$genderMarj,
+        Race3 %in% input$raceMarj,
+      )
+      
+  })
+  
+  output$plotMarj <- renderPlot({
+    print(nrow(df_marj()))
+    print(table(df_marj()$Gender))
+    print(table(df_marj()$Race3))
+    p_marj <- ggplot(df_marj(),
+                      aes(x = RegularMarij,
+                          y = .data[[input$y_var]],
+                          fill = Alcohol12PlusYr,
+                          color = Alcohol12PlusYr)) +
+      geom_boxplot(alpha = 0.6, trim = FALSE) +
+      geom_point(alpha = 0.35, size = 0.9) +
+      facet_wrap(Gender ~ Race3) +
+      guides(color = "none") +
+      labs(
+        title = sprintf("%s by Marijuana Use and Alcohol Use Across Race and Gender", input$y_var),
+        x = "Regular Marijuana Use (Yes / No)",
+        y = input$y_var,
+        fill = "Alcohol Use"
+      )
+    
+    p_marj
+  })
 }
 
 shinyApp(ui = ui, server = server)
-
