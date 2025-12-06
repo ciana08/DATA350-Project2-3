@@ -276,7 +276,8 @@ server <- function(input, output) {
            y= 'Initial Smoking Age (Years)',
            col = 'Marital Status')
     
-    (p_cig1/p_cig2)
+    (p_cig1/p_cig2)+
+      guides(fill = FALSE)
   })
   
   ###################### Alcohol + Marijuana ######################

@@ -219,3 +219,90 @@ p_m_f
 #ggsave('HD3.png', plot = p_m_f)
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+df_cigg <- NHANESraw |>
+  select(SmokeAge, Poverty, MaritalStatus, Race3)|>
+  mutate(MaritalStatus2 = case_when(
+    MaritalStatus %in% c("NeverMarried", "Divorced","LivePartner") ~ "Not Married",
+    MaritalStatus %in% c("Married") ~ "Married"),
+    MaritalStatus2 = factor(MaritalStatus2, levels = c("Married", "Not Married")))|>
+  filter(!is.na(MaritalStatus2), !is.na(Race3))|>
+  filter(MaritalStatus2 %in% c('Married'), Race3 %in% c('Black'))
+
+
+
+p_cig1 <-ggplot(df_cigg, aes(x = Poverty, y = SmokeAge,col = MaritalStatus2))+
+  geom_density2d(color = 'black', linewidth = 0.75)+
+  geom_point(alpha = 0.3, size = 0.8)+
+  theme_bw() +
+  labs(title = 'Smoking Age by Poverty Across Marital Status and Race',
+       y = 'Initial Smoking Age (Years)',
+       col = 'Marital Status')+
+  scale_color_brewer(palette = "Set1")
+
+p_cig2 <- ggplot(df_cigg, aes(x = Poverty, y = SmokeAge, col = MaritalStatus2))+
+  geom_point(alpha = 0.3, size = 0.8)+
+  geom_smooth(aes(fill = MaritalStatus2))+
+  facet_wrap(~Race3, scale = 'free')+
+  theme_bw()+
+  scale_color_brewer(palette = "Set1")+
+  labs(caption = '95% Confidence Interval for Smoothing Model(s) \n
+           "Not Married": represents all marital statuses other than "Married" \n
+           "Poverty": Ratio of family income to poverty guidelines (Smaller values indicate more poverty)',
+       y= 'Initial Smoking Age (Years)',
+       col = 'Marital Status')
+
+(p_cig1/p_cig2)+
+  guides(fill = FALSE)
+```
+
+```{r}
+df_cigg <- NHANESraw |>
+  select(SmokeAge, Poverty, MaritalStatus, Race3)|>
+  mutate(MaritalStatus2 = case_when(
+    MaritalStatus %in% c("NeverMarried", "Divorced","LivePartner") ~ "Not Married",
+    MaritalStatus %in% c("Married") ~ "Married"),
+    MaritalStatus2 = factor(MaritalStatus2, levels = c("Married", "Not Married")))|>
+  filter(!is.na(MaritalStatus2), !is.na(Race3))|>
+  filter(MaritalStatus2 %in% c('Married','Not Married'), Race3 %in% c('Asian','Black','Hispanic','Mexican','White','Other'))
+
+
+
+p_cig1 <-ggplot(df_cigg, aes(x = Poverty, y = SmokeAge,col = MaritalStatus2))+
+  geom_density2d(color = 'black', linewidth = 0.75)+
+  geom_point(alpha = 0.3, size = 0.8)+
+  theme_bw() +
+  labs(title = 'Smoking Age by Poverty Across Marital Status and Race',
+       y = 'Initial Smoking Age (Years)',
+       col = 'Marital Status')+
+  scale_color_brewer(palette = "Set1")
+
+p_cig2 <- ggplot(df_cigg, aes(x = Poverty, y = SmokeAge, col = MaritalStatus2))+
+  geom_point(alpha = 0.3, size = 0.8)+
+  geom_smooth(aes(fill = MaritalStatus2))+
+  facet_wrap(~Race3, scale = 'free')+
+  theme_bw()+
+  scale_color_brewer(palette = "Set1")+
+  labs(caption = '95% Confidence Interval for Smoothing Model(s) \n
+           "Not Married": represents all marital statuses other than "Married" \n
+           "Poverty": Ratio of family income to poverty guidelines (Smaller values indicate more poverty)',
+       y= 'Initial Smoking Age (Years)',
+       col = 'Marital Status')
+
+(p_cig1/p_cig2)+
+  guides(fill = FALSE)
+```
+
