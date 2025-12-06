@@ -1,0 +1,221 @@
+---
+title: "Project2-3"
+output: html_document
+date: "2025-12-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## YouTube Link
+
+[YouTube Link](https://www.youtube.com/ "Presentation")
+
+#Substance Use Explained by Demographics and Contributing Factors
+```{r}
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+```
+
+## Data Summary
+```{r}
+df <- NHANESraw|>
+  select('HardDrugs','SmokeAge','Marijuana','AlcoholYear','Race3','Age',
+         'Gender','MaritalStatus','Poverty','Education','BMI','TotChol')|>
+  slice_sample(n = 25)
+print(glimpse(df))
+```
+
+```{r}
+df_stats <- NHANESraw |>
+  select(Race3)
+
+plotsStats <- lapply(names(df_stats), function(x){
+  p <- ggplot(df_stats)+aes_string(x)
+  
+  if(is.numeric(df_stats[[x]])){
+    p <- p + geom_density(fill = 'grey', alpha = 0.8)
+  }else{
+    p <- p + geom_bar() + theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+  }
+})
+p_stats1 <- plot_grid(plotlist = plotsStats)
+
+#ggsave('stats1.png', plot = p_stats1)
+
+print(summary(df_stats))
+print(p_stats1)
+
+```
+
+```{r}
+df_stats <- NHANESraw |>
+  select(Race3, BMI)
+
+plotsStats <- lapply(names(df_stats), function(x){
+  p <- ggplot(df_stats)+aes_string(x)
+  
+  if(is.numeric(df_stats[[x]])){
+    p <- p + geom_density(fill = 'grey', alpha = 0.8)
+  }else{
+    p <- p + geom_bar() + theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+  }
+})
+p_stats1 <- plot_grid(plotlist = plotsStats)
+
+#ggsave('stats1.png', plot = p_stats1)
+
+print(summary(df_stats))
+print(p_stats1)
+```
+
+
+## Hard Drugs
+```{r}
+df_HD <- NHANESraw |>
+  select(HardDrugs, Race3, Gender, Age)|>
+  filter(HardDrugs != '<NA>' & !is.na(Race3) & Age < 70 & Age >= 18) |>
+  mutate(HDYes = case_when(
+    HardDrugs == 'Yes' ~ 1,
+    TRUE ~ 0
+  ),
+  ageGroup = case_when(
+    Age < 30 ~ '18-29',
+    Age < 40 ~ '30-39',
+    Age < 50 ~ '40-49',
+    Age < 60 ~ '50-59',
+    Age < 70 ~ '60-69'
+  ))
+
+df_HD_filt <- df_HD |>
+  filter(Race3 %in% c('White'))|>
+  filter(ageGroup %in% c('50-59'))
+  
+pie <- df_HD_filt |>
+  count(Race3,Gender, ageGroup, HDYes, name = "count")|>
+  group_by(Race3, Gender, ageGroup)|>
+  mutate(percentage = round(count / sum(count)*100, digits = 1))|>
+  ungroup()
+
+HD_theme <- theme_void() +
+  theme(
+    plot.margin = margin(2, 2, 2, 2),
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    panel.spacing = unit(0.3, "lines"),
+  )
+
+p_f <- ggplot(subset(pie, Gender == "female"), 
+              aes(x = "", y = count, fill = as.factor(HDYes))) + 
+  geom_bar(stat = "identity", position = position_fill(), 
+           width = 1, color = "white") +
+  geom_text(
+    aes(label = paste0(percentage,'%')),
+    position = position_fill(vjust = 0.60),
+    size = 8)+
+  coord_polar("y")+
+  facet_grid(ageGroup ~ Race3)+
+  scale_fill_brewer(palette = "Set1", name = 'Hard Drug Use', labels = c('No','Yes'))+
+  ggtitle("Female")+
+  labs(subtitle = 'Faceted by Race and Age Group (Years)')+
+  HD_theme+
+  plot_layout(guides = "collect") &
+  theme(
+    legend.position = "bottom",
+    plot.margin = margin(2, 2, 2, 2))
+
+#ggsave('HD1.png', plot = p_f)
+p_f
+```
+
+```{r}
+df_HD_filt <- df_HD |>
+  filter(Race3 %in% c('Asian','Black','Hispanic','Mexican','White','Other'))|>
+  filter(ageGroup %in%  c('18-29','30-39','40-49','50-59','60-69'))
+  
+pie <- df_HD_filt |>
+  count(Race3,Gender, ageGroup, HDYes, name = "count")|>
+  group_by(Race3, Gender, ageGroup)|>
+  mutate(percentage = round(count / sum(count)*100, digits = 1))|>
+  ungroup()
+
+p_f <- ggplot(subset(pie, Gender == "female"), 
+              aes(x = "", y = count, fill = as.factor(HDYes))) + 
+  geom_bar(stat = "identity", position = position_fill(), 
+           width = 1, color = "white") +
+  geom_text(
+    aes(label = paste0(percentage,'%')),
+    position = position_fill(vjust = 0.60),
+    size = 1.8)+
+  coord_polar("y")+
+  facet_grid(ageGroup ~ Race3)+
+  scale_fill_brewer(palette = "Set1", name = 'Hard Drug Use', labels = c('No','Yes'))+
+  ggtitle("Female")+
+  labs(subtitle = 'Faceted by Race and Age Group (Years)')+
+  HD_theme+
+  plot_layout(guides = "collect") &
+  theme(
+    legend.position = "bottom",
+    plot.margin = margin(2, 2, 2, 2))
+
+#ggsave('HD2.png', plot = p_f)
+p_f
+```
+
+```{r}
+df_HD_filt <- df_HD |>
+  filter(Race3 %in% c('Asian','Black','Hispanic','Mexican','White','Other'))|>
+  filter(ageGroup %in%  c('18-29','30-39','40-49','50-59','60-69'))
+  
+pie <- df_HD_filt |>
+  count(Race3,Gender, ageGroup, HDYes, name = "count")|>
+  group_by(Race3, Gender, ageGroup)|>
+  mutate(percentage = round(count / sum(count)*100, digits = 1))|>
+  ungroup()
+
+p_f <- ggplot(subset(pie, Gender == "female"), 
+              aes(x = "", y = count, fill = as.factor(HDYes))) + 
+  geom_bar(stat = "identity", position = position_fill(), 
+           width = 1, color = "white") +
+  geom_text(
+    aes(label = paste0(percentage,'%')),
+    position = position_fill(vjust = 0.60),
+    size = 1.8)+
+  coord_polar("y")+
+  facet_grid(ageGroup ~ Race3)+
+  scale_fill_brewer(palette = "Set1", name = 'Hard Drug Use', labels = c('No','Yes'))+
+  ggtitle("Female")+
+  labs(subtitle = 'Faceted by Race and Age Group (Years)')+
+  HD_theme
+
+p_m <- ggplot(subset(pie, Gender == "male"), 
+              aes(x = "", y = count, fill = as.factor(HDYes))) + 
+  geom_bar(stat = "identity", position = position_fill(), width = 1,
+           color = "white") +
+  geom_text(aes(label = paste0(percentage,'%')),
+            position = position_fill(vjust = 0.60),
+            size = 1.8)+
+  coord_polar("y")+
+  facet_grid(ageGroup ~ Race3)+
+  scale_fill_brewer(palette = "Set1", name  = "Hard Drug Use", labels = c('No','Yes'))+
+  ggtitle("Male")+
+  labs(subtitle = 'Faceted by Race and Age Group (Years)')+
+  HD_theme
+
+p_m_f <- (p_m | p_f) +
+  #inset_element(blank, left = 0, bottom = 0.5, right = 2.5, top = 0.5)+
+  plot_layout(guides = "collect") &
+  theme(
+    legend.position = "bottom",
+    plot.margin = margin(2, 2, 2, 2)  
+  )
+p_m_f
+#ggsave('HD3.png', plot = p_m_f)
+```
+

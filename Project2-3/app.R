@@ -8,7 +8,7 @@ library(cowplot)
 
 
 ui <- fluidPage(
-  titlePanel('Substance Use Versus Demographic Features'),
+  titlePanel('Substance Use Explained by Demographics and Contributing Factors'),
   
   tabsetPanel(
     tabPanel('Summary',
@@ -19,9 +19,10 @@ ui <- fluidPage(
                                   choices = c('HardDrugs', 'SmokeAge',
                                               'Marijuana', 'AlcoholYear', 'Race3','Age',
                                               'Gender', 'MaritalStatus', 'Poverty', 
-                                              'Education'))
+                                              'Education','BMI','TotChol'))
              ),
              mainPanel(
+               verbatimTextOutput('glimpse'),
                verbatimTextOutput('stats'),
                plotOutput('plotStats')
              ),
@@ -37,7 +38,7 @@ ui <- fluidPage(
                checkboxGroupInput('ageHD','Select Age', choices = c('18-29','30-39','40-49','50-59','60-69'),
                                   selected = c('18-29','30-39','40-49','50-59','60-69')),
                checkboxGroupInput('genderHD','Select Gender',
-                                  choiceNames = list('male', 'female'),
+                                  choiceNames = list('Male', 'Female'),
                                   choiceValues = list(2,1), selected = list(2,1))
              ),
              mainPanel(
@@ -96,6 +97,13 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   ################### Summary ##################
+  output$glimpse <- renderPrint({
+    df <- NHANESraw|>
+      select('HardDrugs','SmokeAge','Marijuana','AlcoholYear','Race3','Age',
+             'Gender','MaritalStatus','Poverty','Education','BMI','TotChol')|>
+      slice_sample(n = 25)
+    glimpse(df)
+  })
   df_stats <- eventReactive(input$displStats, {
     NHANESraw |>
       select(input$varStats)
@@ -106,7 +114,7 @@ server <- function(input, output) {
       p <- ggplot(df_stats())+aes_string(x)
       
       if(is.numeric(df_stats()[[x]])){
-        p <- p + geom_density()
+        p <- p + geom_density(fill = 'grey', alpha = 0.8)
       }else{
         p <- p + geom_bar() + theme(
           axis.text.x = element_text(angle = 45, hjust = 1)
@@ -209,7 +217,6 @@ server <- function(input, output) {
     
     if(gender() == 3){
       (p_m | p_f) +
-        #inset_element(blank, left = 0, bottom = 0.5, right = 2.5, top = 0.5)+
         plot_layout(guides = "collect") &
         theme(
           legend.position = "bottom",
@@ -252,20 +259,22 @@ server <- function(input, output) {
       geom_density2d(color = 'black', linewidth = 0.75)+
       geom_point(alpha = 0.3, size = 0.8)+
       theme_bw() +
-      theme(axis.line = element_line(color='black'),
-            plot.background = element_blank(),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.border = element_blank())+
+      labs(title = 'Smoking Age by Poverty Across Marital Status and Race',
+           y = 'Initial Smoking Age (Years)',
+           col = 'Marital Status')+
       scale_color_brewer(palette = "Set1")
     
     p_cig2 <- ggplot(df_Cig(), aes(x = Poverty, y = SmokeAge, col = MaritalStatus2))+
       geom_point(alpha = 0.3, size = 0.8)+
-      geom_smooth()+
+      geom_smooth(aes(fill = MaritalStatus2))+
       facet_wrap(~Race3, scale = 'free')+
       theme_bw()+
       scale_color_brewer(palette = "Set1")+
-      labs(caption = '95% Confidence Interval for Smoothing Model(s)')
+      labs(caption = '95% Confidence Interval for Smoothing Model(s) \n
+           "Not Married": represents all marital statuses other than "Married" \n
+           "Poverty": Ratio of family income to poverty guidelines (Smaller values indicate more poverty)',
+           y= 'Initial Smoking Age (Years)',
+           col = 'Marital Status')
     
     (p_cig1/p_cig2)
   })
