@@ -90,6 +90,25 @@ ui <- fluidPage(
              mainPanel(
                plotOutput('plotMarj', height = '700px')
              )
+    ), 
+    ############## Alcohol ################
+    tabPanel("Alcohol", 
+             h3("How does reported alcohol consumption vary by marriage status, race, and gender?"),
+             sidebarPanel(
+               width = 3, 
+               actionButton("viz_alc", "Visualize"), 
+               checkboxGroupInput("race_alc", "Select Race" , choices = c("Asian", "Black", "Hispanic", "Mexican", "White", "Other"), 
+                                  selected = c("Asian", "Black", "Hispanic", "Mexican", "White", "Other")), 
+               checkboxGroupInput("gender_alc", "Select Gender",
+                                  choiceNames = list("Male", "Female"), 
+                                  choiceValues = list(2,1), selected = list(2,1)),
+               checkboxGroupInput("marriage_alc", "Select Marriage Status", 
+                                  choices = c("Married", "Never Married", "Separated", "Divorced", "Widowed"), 
+                                  selected = c("Married", "Never Married", "Separated", "Divorced", "Widowed"))
+             ),
+             mainPanel(
+               plotOutput('plot_alc', height = "500px", width = "1000px")
+             )
     )
   )
 )
@@ -320,6 +339,64 @@ server <- function(input, output) {
       )
     
     p_marj
+  })
+  #################### Alcohol ######################
+  df_alc <- eventReactive(input$viz_alc, {
+    df_alcohol <- NHANESraw |>
+      select(Race3, AlcoholYear, Gender, MaritalStatus, Age, SurveyYr)|>
+      filter(SurveyYr == "2011_12" & Age >= 20)|>
+      filter(
+        !is.na(MaritalStatus), 
+        !is.na(Race3),
+        !is.na(Gender),
+        !is.na(AlcoholYear)) |> 
+      mutate(MaritalStatus = case_when(
+        MaritalStatus == "NeverMarried" ~ "Never Married",
+        TRUE ~ MaritalStatus)) |>
+      mutate(LogAlc = log(AlcoholYear))|>
+      filter(Race3 %in% input$race_alc, 
+             MaritalStatus %in% input$marriage_alc)
+  })
+  
+  gender <- eventReactive(input$viz_alc, {
+    sum(as.numeric(input$gender_alc))
+  })
+  
+  output$plot_alc <- renderPlot({
+    plot_alc_m <- ggplot(subset(df_alc(), Gender == "male"), aes(x = LogAlc, fill = MaritalStatus)) +
+      geom_density(alpha = 0.3) +
+      facet_wrap(~Race3) + ggtitle("Male") + labs(subtitle = "Faceted by Race", 
+                                x = "Estimated Number of Days Drinking in the Past Year (log)",
+                                y = "Density", 
+                                fill = "Marital Status")
+    plot_alc_f <- ggplot(subset(df_alc(), Gender == "female"), aes(x = LogAlc, fill = MaritalStatus)) +
+      geom_density(alpha = 0.3) +
+      facet_wrap(~Race3) + ggtitle("Female") + labs(subtitle = "Faceted by Race", 
+                                x = "Estimated Number of Days Drinking in the Past Year (log)", 
+                                y = "Density", 
+                                fill = "Marital Status")
+    
+    if(gender() == 3){
+      (plot_alc_m | plot_alc_f) +
+        plot_layout(guides = "collect") &
+        theme(
+          legend.position = "bottom"
+        ) 
+    }else if (gender() == 2){
+      (plot_alc_m) +
+        plot_layout(guides = "collect") &
+        theme(
+          plot.margin = margin(2, 2, 2, 2)  
+        )
+    }else if(gender() == 1){
+      (plot_alc_f) +
+        plot_layout(guides = "collect") &
+        theme(
+          plot.margin = margin(2, 2, 2, 2)
+        )
+    }else{
+      ggplot() 
+    }
   })
 }
 
