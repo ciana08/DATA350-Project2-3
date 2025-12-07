@@ -174,7 +174,7 @@ server <- function(input, output) {
       ungroup()
   })
   
-  gender <- eventReactive(input$vizHD, {
+  genderHD <- eventReactive(input$vizHD, {
     sum(as.numeric(input$genderHD))
   })
   
@@ -234,21 +234,21 @@ server <- function(input, output) {
       HD_theme
     
     
-    if(gender() == 3){
+    if(genderHD() == 3){
       (p_m | p_f) +
         plot_layout(guides = "collect") &
         theme(
           legend.position = "bottom",
           plot.margin = margin(2, 2, 2, 2)  
         )
-    }else if (gender() == 2){
+    }else if (genderHD() == 2){
       (p_m) +
         plot_layout(guides = "collect") &
         theme(
           legend.position = "bottom",
           plot.margin = margin(2, 2, 2, 2)  
         )
-    }else if(gender() == 1){
+    }else if(genderHD() == 1){
       (p_f) +
         plot_layout(guides = "collect") &
         theme(
