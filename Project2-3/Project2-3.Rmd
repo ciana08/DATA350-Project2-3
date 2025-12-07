@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 [YouTube Link](https://www.youtube.com/ "Presentation")
 
-#Substance Use Explained by Demographics and Contributing Factors
+# Examining the Influence of Demographic and Social Determinants on Substance Use
 ```{r}
 library(dplyr)
 library(ggplot2)
@@ -72,11 +72,11 @@ p_stats1 <- plot_grid(plotlist = plotsStats)
 #ggsave('stats1.png', plot = p_stats1)
 
 print(summary(df_stats))
-print(p_stats1)
+p_stats1
 ```
 
 
-## Hard Drugs
+## What participants have used hard drugs and how does participation vary by race, gender, and age?
 ```{r}
 df_HD <- NHANESraw |>
   select(HardDrugs, Race3, Gender, Age)|>
@@ -123,7 +123,8 @@ p_f <- ggplot(subset(pie, Gender == "female"),
   facet_grid(ageGroup ~ Race3)+
   scale_fill_brewer(palette = "Set1", name = 'Hard Drug Use', labels = c('No','Yes'))+
   ggtitle("Female")+
-  labs(subtitle = 'Faceted by Race and Age Group (Years)')+
+  labs(subtitle = 'Faceted by Race and Age Group (Years)',
+       caption = "Source: NHANESraw")+
   HD_theme+
   plot_layout(guides = "collect") &
   theme(
@@ -157,7 +158,8 @@ p_f <- ggplot(subset(pie, Gender == "female"),
   facet_grid(ageGroup ~ Race3)+
   scale_fill_brewer(palette = "Set1", name = 'Hard Drug Use', labels = c('No','Yes'))+
   ggtitle("Female")+
-  labs(subtitle = 'Faceted by Race and Age Group (Years)')+
+  labs(subtitle = 'Faceted by Race and Age Group (Years)',
+       caption = "Source: NHANESraw")+
   HD_theme+
   plot_layout(guides = "collect") &
   theme(
@@ -205,7 +207,8 @@ p_m <- ggplot(subset(pie, Gender == "male"),
   facet_grid(ageGroup ~ Race3)+
   scale_fill_brewer(palette = "Set1", name  = "Hard Drug Use", labels = c('No','Yes'))+
   ggtitle("Male")+
-  labs(subtitle = 'Faceted by Race and Age Group (Years)')+
+  labs(subtitle = 'Faceted by Race and Age Group (Years)',
+       caption = "Source: NHANESraw")+
   HD_theme
 
 p_m_f <- (p_m | p_f) +
@@ -219,20 +222,8 @@ p_m_f
 #ggsave('HD3.png', plot = p_m_f)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
+# What age do participants first smoke cigarettes across poverty, marital status, and race?
+```{r, fig.width=8, fig.height=8}
 df_cigg <- NHANESraw |>
   select(SmokeAge, Poverty, MaritalStatus, Race3)|>
   mutate(MaritalStatus2 = case_when(
@@ -259,7 +250,8 @@ p_cig2 <- ggplot(df_cigg, aes(x = Poverty, y = SmokeAge, col = MaritalStatus2))+
   facet_wrap(~Race3, scale = 'free')+
   theme_bw()+
   scale_color_brewer(palette = "Set1")+
-  labs(caption = '95% Confidence Interval for Smoothing Model(s) \n
+  labs(caption = 'Source: NHANESraw \n
+            95% Confidence Interval for Smoothing Model(s) \n
            "Not Married": represents all marital statuses other than "Married" \n
            "Poverty": Ratio of family income to poverty guidelines (Smaller values indicate more poverty)',
        y= 'Initial Smoking Age (Years)',
@@ -269,7 +261,7 @@ p_cig2 <- ggplot(df_cigg, aes(x = Poverty, y = SmokeAge, col = MaritalStatus2))+
   guides(fill = FALSE)
 ```
 
-```{r}
+```{r, fig.width=8, fig.height=8}
 df_cigg <- NHANESraw |>
   select(SmokeAge, Poverty, MaritalStatus, Race3)|>
   mutate(MaritalStatus2 = case_when(
@@ -305,8 +297,60 @@ p_cig2 <- ggplot(df_cigg, aes(x = Poverty, y = SmokeAge, col = MaritalStatus2))+
 (p_cig1/p_cig2)+
   guides(fill = FALSE)
 ```
+
+# How does marijauna use relate to alcohol use, cholesterol and BMI across demographics such as race and gender?
+```{r, fig.width=8, fig.height=16}
+df_marj <- NHANESraw |>
+    select(RegularMarij, Alcohol12PlusYr, BMI, TotChol, Gender, Race3) |>
+    filter(
+      !is.na(RegularMarij),
+      !is.na(Alcohol12PlusYr),
+      !is.na(BMI),
+      !is.na(TotChol),
+      !is.na(Gender),
+      !is.na(Race3)
+    ) 
+
+p_marj1 <- ggplot(df_marj,
+                  aes(x = RegularMarij,
+                      y = BMI,
+                      fill = Alcohol12PlusYr,
+                      color = Alcohol12PlusYr)) +
+  geom_boxplot(alpha = 0.6, trim = FALSE) +
+  geom_point(alpha = 0.35, size = 0.9) +
+  facet_wrap(Gender ~ Race3) +
+  guides(color = "none") +
+  labs(
+    title = ("BMI by Marijuana Use and Alcohol Use Across Race and Gender"),
+    x = "Regular Marijuana Use (Yes / No)",
+    y = "BMI",
+    fill = "Alcohol Use",
+    caption = "Source: NHANESraw. BMI variation by marijuana use, alcohol use, race, and gender."
+  )
+
+p_marj2 <- ggplot(df_marj,
+                  aes(x = RegularMarij,
+                      y = TotChol,
+                      fill = Alcohol12PlusYr,
+                      color = Alcohol12PlusYr)) +
+  geom_boxplot(alpha = 0.6, trim = FALSE) +
+  geom_point(alpha = 0.35, size = 0.9) +
+  facet_wrap(Gender ~ Race3) +
+  guides(color = "none") +
+  labs(
+    title = ("Cholesterol by Marijuana Use and Alcohol Use Across Race and Gender"),
+    x = "Regular Marijuana Use (Yes / No)",
+    y = "Cholesterol",
+    fill = "Alcohol Use",
+    caption = "Source: NHANESraw. Cholesterol variation by marijuana use, alcohol use, race, and gender."
+  )
+
+(p_marj1/p_marj2)
+
+```
+
 ## How does alcohol consumption vary by marriage status, race, and gender?
-```{r}
+```{r, fig.width=8, fig.height=16}
 df_alc <- NHANESraw |>
       select(Race3, AlcoholYear, Gender, MaritalStatus, Age, SurveyYr)|>
       filter(SurveyYr == "2011_12" & Age >= 20)|>
@@ -319,12 +363,16 @@ df_alc <- NHANESraw |>
   
   plot_alc_m <- ggplot(subset(df_alc, Gender == "male"), aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
-      facet_wrap(Race3)
+      facet_wrap(~Race3) +
+      labs(caption = "Source: NHANESraw.")
   plot_alc_f <- ggplot(subset(df_alc, Gender == "female"), aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
-      facet_wrap(Race3)
+      facet_wrap(~Race3)+
+      labs(caption = "Source: NHANESraw.")
   plot_alc <- ggplot(df_alc, aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
-      facet_wrap(Race3)
+      facet_wrap(~Race3)+
+      labs(caption = "Source: NHANESraw.")
+  
+  (plot_alc_m/plot_alc_f/plot_alc)
 ```
-
