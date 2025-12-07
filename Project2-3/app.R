@@ -368,13 +368,21 @@ server <- function(input, output) {
       facet_wrap(~Race3) + ggtitle("Male") + labs(subtitle = "Faceted by Race", 
                                 x = "Estimated Number of Days Drinking in the Past Year (log)",
                                 y = "Density", 
-                                fill = "Marital Status")
+                                fill = "Marital Status", 
+                                caption = "This graph shows KDE plots of the log-transformed self-reported 
+                                number of alcoholic beverages consumed in the past year by male participants across 
+                                the Race3 variable from the 2011-2012 survey year. Log transformation was applied
+                                to normalize the distribution and improve visual clarity.")
     plot_alc_f <- ggplot(subset(df_alc(), Gender == "female"), aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
       facet_wrap(~Race3) + ggtitle("Female") + labs(subtitle = "Faceted by Race", 
                                 x = "Estimated Number of Days Drinking in the Past Year (log)", 
                                 y = "Density", 
-                                fill = "Marital Status")
+                                fill = "Marital Status", 
+                                caption = "This graph shows KDE plots of the log-transformed self-reported 
+                                number of alcoholic beverages consumed in the past year by female participants across 
+                                the Race3 variable from the 2011-2012 survey year. Log transformation was applied
+                                to normalize the distribution and improve visual clarity.")
     
     if(gender() == 3){
       (plot_alc_m | plot_alc_f) +
