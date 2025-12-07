@@ -8,7 +8,7 @@ library(cowplot)
 
 
 ui <- fluidPage(
-  titlePanel('Substance Use Explained by Demographics and Contributing Factors'),
+  titlePanel('Examining the Influence of Demographic and Social Determinants on Substance Use'),
   
   tabsetPanel(
     tabPanel('Summary',
@@ -60,8 +60,8 @@ ui <- fluidPage(
                plotOutput('plotCig', height = '700px')
              )
     ),
-    tabPanel('Alcohol and Marijuana',
-             h3('How does marijauna use relate to alcohol use, cholesterol and BMI across demographics such as race and gender?'),
+    tabPanel('Marijuana',
+             h3('How does marijuana use relate to alcohol consumption, BMI, and cholesterol across race and gender?'),
              sidebarPanel(
                width = 3,
                actionButton('vizMarj', 'Visualize'),
@@ -299,7 +299,7 @@ server <- function(input, output) {
       guides(fill = FALSE)
   })
   
-  ###################### Alcohol + Marijuana ######################
+  ###################### Marijuana ######################
   df_marj <- eventReactive(input$vizMarj, {
     df_mar <- NHANESraw |>
       select(RegularMarij, Alcohol12PlusYr, BMI, TotChol, Gender, Race3) |>
@@ -335,7 +335,11 @@ server <- function(input, output) {
         title = sprintf("%s by Marijuana Use and Alcohol Use Across Race and Gender", input$y_var),
         x = "Regular Marijuana Use (Yes / No)",
         y = input$y_var,
-        fill = "Alcohol Use"
+        fill = "Alcohol Use",
+        caption = 'Data from NHANES 2011–2012, filtered to adults aged 18 and older. 
+                  Alcohol use is defined as having consumed at least 12 alcoholic drinks in any one year (Alcohol12PlusYr). 
+                  This plot shows how regular marijuana use relates to alcohol consumption, BMI, and cholesterol across 
+                  demographic groups, with facets by race and gender.'
       )
     
     p_marj
