@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## YouTube Link
 
-[YouTube Link](https://www.youtube.com/ "Presentation")
+[YouTube Link](https://www.youtube.com/watch?v=jcYpcAuwLz0)
 
 # Examining the Influence of Demographic and Social Determinants on Substance Use
 ```{r}
