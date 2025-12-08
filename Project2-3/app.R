@@ -374,9 +374,9 @@ server <- function(input, output) {
                                 y = "Density", 
                                 fill = "Marital Status", 
                                 caption = "This graph shows KDE plots of the log-transformed self-reported 
-                                number of alcoholic beverages consumed in the past year by male participants across 
-                                the Race3 variable from the 2011-2012 survey year. Log transformation was applied
-                                to normalize the distribution and improve visual clarity.")
+                                number of days male participants consumed alcoholic beverages in the past year 
+                               across the Race3 variable from the 2011-2012 survey year. Log trasnformation was applied
+                                to normalize the distribution and improve visual clarity. Source: NHANESraw")
     plot_alc_f <- ggplot(subset(df_alc(), Gender == "female"), aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
       facet_wrap(~Race3) + ggtitle("Female") + labs(subtitle = "Faceted by Race", 
@@ -384,9 +384,9 @@ server <- function(input, output) {
                                 y = "Density", 
                                 fill = "Marital Status", 
                                 caption = "This graph shows KDE plots of the log-transformed self-reported 
-                                number of alcoholic beverages consumed in the past year by female participants across 
-                                the Race3 variable from the 2011-2012 survey year. Log transformation was applied
-                                to normalize the distribution and improve visual clarity.")
+                                number of days female participants consumed alcoholic beverages in the past year 
+                               across the Race3 variable from the 2011-2012 survey year. Log trasnformation was applied
+                                to normalize the distribution and improve visual clarity. Source: NHANESraw")
     
     if(gender() == 3){
       (plot_alc_m | plot_alc_f) +
