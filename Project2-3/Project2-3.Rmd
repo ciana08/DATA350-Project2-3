@@ -10,13 +10,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## YouTube Link
 
-[YouTube Link](https://www.youtube.com/watch?v=jcYpcAuwLz0)
+[Group 4: Project 2-3](https://www.youtube.com/watch?v=jcYpcAuwLz0)
 
 # Examining the Influence of Demographic and Social Determinants on Substance Use
 ```{r}
 library(dplyr)
 library(ggplot2)
 library(cowplot)
+library(NHANES)
+library(patchwork)
 ```
 
 ## Data Summary
