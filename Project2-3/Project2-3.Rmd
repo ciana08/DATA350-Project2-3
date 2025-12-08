@@ -364,15 +364,24 @@ df_alc <- NHANESraw |>
   plot_alc_m <- ggplot(subset(df_alc, Gender == "male"), aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
       facet_wrap(~Race3) +
-      labs(caption = "Source: NHANESraw.")
+      labs(caption = "This graph shows KDE plots of the log-transformed self-reported 
+                                number of days male participants consumed alcoholic beverages in the past year 
+                               across the Race3 variable from the 2011-2012 survey year. Log trasnformation was applied
+                                to normalize the distribution and improve visual clarity. Source: NHANESraw.")
   plot_alc_f <- ggplot(subset(df_alc, Gender == "female"), aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
       facet_wrap(~Race3)+
-      labs(caption = "Source: NHANESraw.")
+      labs(caption = "This graph shows KDE plots of the log-transformed self-reported 
+                                number of days female participants consumed alcoholic beverages in the past year 
+                               across the Race3 variable from the 2011-2012 survey year. Log trasnformation was applied
+                                to normalize the distribution and improve visual clarity. Source: NHANESraw.")
   plot_alc <- ggplot(df_alc, aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
       facet_wrap(~Race3)+
-      labs(caption = "Source: NHANESraw.")
+      labs(caption = "This graph shows KDE plots of the log-transformed self-reported 
+                                number of days participants consumed alcoholic beverages in the past year 
+                               across the Race3 variable from the 2011-2012 survey year. Log trasnformation was applied
+                                to normalize the distribution and improve visual clarity. Source: NHANESraw.")
   
   (plot_alc_m/plot_alc_f/plot_alc)
 ```
