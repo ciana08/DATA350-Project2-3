@@ -19,6 +19,8 @@ library(ggplot2)
 library(cowplot)
 library(NHANES)
 library(patchwork)
+library(tidyverse)
+library(knitr)
 ```
 
 ## Data Summary
@@ -362,30 +364,39 @@ df_alc <- NHANESraw |>
         !is.na(MaritalStatus), 
         !is.na(Race3),
         !is.na(Gender),
-        !is.na(AlcoholYear)) |> 
+        !is.na(AlcoholYear)) |>
+  filter(MaritalStatus != "LivePartner") |> 
+  mutate(MaritalStatus = case_when(
+        MaritalStatus == "NeverMarried" ~ "Never Married",
+        TRUE ~ MaritalStatus)) |>
       mutate(LogAlc = log(AlcoholYear))
   
   plot_alc_m <- ggplot(subset(df_alc, Gender == "male"), aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
-      facet_wrap(~Race3) +
-      labs(caption = "This graph shows KDE plots of the log-transformed self-reported 
-                                number of days male participants consumed alcoholic beverages in the past year 
-                               across the Race3 variable from the 2011-2012 survey year. Log trasnformation was applied
-                                to normalize the distribution and improve visual clarity. Source: NHANESraw.")
+      facet_wrap(~Race3) + ggtitle("Male") + labs(subtitle = "Faceted by Race", 
+                                x = "Estimated Number of Days Drinking in the Past Year (log)", 
+                                y = "Density", 
+                                fill = "Marital Status", 
+                                caption = str_wrap("This graph shows KDE plots of the log-transformed self-reported number of days male participants consumed alcoholic beverages in the past year across the Race3 variable from the 2011-2012 survey year. Log transformation was applied
+to normalize the distribution and improve visual clarity. Source: NHANESraw.", width = 100))
+  
   plot_alc_f <- ggplot(subset(df_alc, Gender == "female"), aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
-      facet_wrap(~Race3)+
-      labs(caption = "This graph shows KDE plots of the log-transformed self-reported 
-                                number of days female participants consumed alcoholic beverages in the past year 
-                               across the Race3 variable from the 2011-2012 survey year. Log trasnformation was applied
-                                to normalize the distribution and improve visual clarity. Source: NHANESraw.")
+      facet_wrap(~Race3)+ ggtitle("Female") + labs(subtitle = "Faceted by Race", 
+                                x = "Estimated Number of Days Drinking in the Past Year (log)", 
+                                y = "Density", 
+                                fill = "Marital Status", 
+                                caption = str_wrap("This graph shows KDE plots of the log-transformed self-reported number of days female participants consumed alcoholic beverages in the past year across the Race3 variable from the 2011-2012 survey year. Log transformation was applied
+to normalize the distribution and improve visual clarity. Source: NHANESraw.", width = 100))
+  
   plot_alc <- ggplot(df_alc, aes(x = LogAlc, fill = MaritalStatus)) +
       geom_density(alpha = 0.3) +
-      facet_wrap(~Race3)+
-      labs(caption = "This graph shows KDE plots of the log-transformed self-reported 
-                                number of days participants consumed alcoholic beverages in the past year 
-                               across the Race3 variable from the 2011-2012 survey year. Log trasnformation was applied
-                                to normalize the distribution and improve visual clarity. Source: NHANESraw.")
+      facet_wrap(~Race3) + ggtitle("Both Male and Female") + labs(subtitle = "Faceted by Race", 
+                                x = "Estimated Number of Days Drinking in the Past Year (log)", 
+                                y = "Density", 
+                                fill = "Marital Status", 
+                                caption = str_wrap("This graph shows KDE plots of the log-transformed     self-reported number of days participants consumed alcoholic beverages in the past year across the Race3 variable from the 2011-2012 survey year. Log transformation was applied
+to normalize the distribution and improve visual clarity. Source: NHANESraw.", width = 100))
   
   (plot_alc_m/plot_alc_f/plot_alc)
 ```
