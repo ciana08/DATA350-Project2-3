@@ -327,7 +327,8 @@ p_marj1 <- ggplot(df_marj,
     x = "Regular Marijuana Use (Yes / No)",
     y = "BMI",
     fill = "Alcohol Use",
-    caption = "Source: NHANESraw. BMI variation by marijuana use, alcohol use, race, and gender."
+    caption = "Source: NHANESraw. Data from NHANES 2011–2012, filtered to adults aged 18 and older. 
+              Alcohol use is defined as having consumed at least 12 alcoholic drinks in any one year (Alcohol12PlusYr). This plot shows how regular marijuana use relates to alcohol consumption, and BMI across demographic groups, with facets by race and gender."
   )
 
 p_marj2 <- ggplot(df_marj,
@@ -344,7 +345,8 @@ p_marj2 <- ggplot(df_marj,
     x = "Regular Marijuana Use (Yes / No)",
     y = "Cholesterol",
     fill = "Alcohol Use",
-    caption = "Source: NHANESraw. Cholesterol variation by marijuana use, alcohol use, race, and gender."
+    caption = "Source: NHANESraw. Data from NHANES 2011–2012, filtered to adults aged 18 and older. 
+              Alcohol use is defined as having consumed at least 12 alcoholic drinks in any one year (Alcohol12PlusYr). This plot shows how regular marijuana use relates to alcohol consumption, and BMI across demographic groups, with facets by race and gender."
   )
 
 (p_marj1/p_marj2)
